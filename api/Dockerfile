@@ -1,18 +1,18 @@
-# Use official Python image
-FROM python:3.13.5
+FROM python:3.13-slim
 
-# Set working directory
+# Install uv.
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Copy the application into the container.
+COPY . /app
+
+# Install the application dependencies.
 WORKDIR /app
+RUN uv sync --frozen --no-cache
 
-# Copy requirements and install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN uv pip install "fastapi[standard]"
 
-# Copy the rest of the application code
-COPY . .
+# Run the application.
+CMD ["/app/.venv/bin/fastapi", "run", "app/main.py", "--port", "80", "--host", "0.0.0.0"]
 
-# Expose FastAPI default port
-EXPOSE 8000
-
-# Start FastAPI with uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# APIConnectionError: Connection error - Need to fix

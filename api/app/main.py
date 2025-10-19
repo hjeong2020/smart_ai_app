@@ -6,9 +6,9 @@ import os
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_openai import ChatOpenAI
 
-from chat.chat_model import ChatBody, ChatResponse
-from chat.chat_service import ChatService
-from chat.agent_service import AgentService
+from app.chat.chat_model import ChatBody, ChatResponse
+from app.chat.chat_service import ChatService
+from app.chat.agent_service import AgentService
 
 app = FastAPI()
 

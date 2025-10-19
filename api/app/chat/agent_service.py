@@ -5,7 +5,7 @@ from langchain.agents import create_agent
 from langchain.agents.structured_output import ToolStrategy
 from langchain_openai import ChatOpenAI
 
-from chat.chat_model import SearchQuery, ProductReview
+from app.chat.chat_model import ProductReview
 
 
 class AgentService:

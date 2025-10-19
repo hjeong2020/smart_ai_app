@@ -7,7 +7,7 @@ from langchain_core.runnables import RunnableConfig
 from langchain.agents.middleware import dynamic_prompt, ModelRequest, SummarizationMiddleware
 from langchain.agents import create_agent
 from langgraph.graph.message import REMOVE_ALL_MESSAGES
-from chat.chat_model import CustomContext
+from app.chat.chat_model import CustomContext
 from langchain_openai import ChatOpenAI
 
 
