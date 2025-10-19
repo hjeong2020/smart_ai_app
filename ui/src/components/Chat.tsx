@@ -1,0 +1,264 @@
+import React, { useEffect, useState } from "react";
+import {
+  Container,
+  TextField,
+  Button,
+  Box,
+  Typography,
+  Grid,
+} from "@mui/material";
+import Divider from "@mui/material/Divider";
+import DeleteIcon from '@mui/icons-material/Delete';
+import Text from "./Text";
+import FormatText from "./FormatText";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { chatMsg, chatMsgV1, deleteMsg } from "../assets/query";
+import { v4 as uuidv4 } from "uuid";
+
+interface ChatMessage {
+  text: string;
+  user?: boolean; // true if sent by the current user, false if received from AI
+}
+
+// Replace with your actual POST endpoint
+// const API_ENDPOINT = "http://localhost:8000/chat";
+
+// Define a query key (should be unique for this data)
+const queryKey = ["message"];
+
+const Chat: React.FC = () => {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const [sessionId, setSessionId] = useState("");
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    let currentSessionId = sessionStorage.getItem("sessionId");
+    if (!currentSessionId) {
+      currentSessionId = uuidv4();
+      sessionStorage.setItem("sessionId", currentSessionId);
+      console.log("here");
+    }
+    setSessionId(currentSessionId);
+
+    // return () => {
+    //   console.log('Component unmounted! Cleaning up...');
+    //   sessionStorage.removeItem('sessonId')
+    // };
+  }, []);
+
+  const mutation = useMutation({
+    mutationFn: ({ newPostData, queryParams }) =>
+      chatMsgV1(newPostData, queryParams),
+    onSuccess: (data, variables, onMutateResult, context) => {
+      // Invalidate relevant queries to refetch data after a successful mutation
+      // queryClient.invalidateQueries(["posts"]);
+      console.log(data.response); //{prompt: 'Tell me an ice cream joke', response: 'Okay, here’s one for you, Bob:\n\nWhy did the ice cr…!” \n\n😄 \n\nHope that brought a smile to your face!', thread_id: 'a1'}
+      setMessages((prevMessages) => [...prevMessages, { text: data.response }]);
+    },
+  });
+
+  // const handleSubmit = () => {
+  //   const newPostData = { prompt: "Do you remember my name?" };
+  //   const queryParams = { thread_id: sessionId };
+
+  //   mutation.mutate({ newPostData, queryParams });
+  // };
+
+  // return (
+  //   <div>
+  //     <button onClick={handleSubmit} disabled={mutation.isPending}>
+  //       {mutation.isPending ? "Creating..." : "Create Post"}
+  //     </button>
+  //     {mutation.isError && <div>Error: {mutation.error.message}</div>}
+  //     {mutation.isSuccess && <div>Post created successfully!</div>}
+  //   </div>
+  // );
+
+  // const mutation = useMutation({
+  //   mutationFn: chatMsg,
+  //   // onSuccess: () => {
+  //   //   // Invalidate and refetch relevant queries after successful mutation
+  //   //   // queryClient.invalidateQueries(['posts']);
+  //   // },
+  //   onSuccess: (data, variables, onMutateResult, context) => {
+  //     // Add AI's response to the state
+  //     setMessages((prevMessages) => [
+  //       ...prevMessages,
+  //       { text: data.choices[0].message.content },
+  //     ]);
+  //   },
+  //   onError: (error) => {
+  //     // Handle errors
+  //     console.error("Error creating post:", error);
+  //   },
+  // });
+
+  const handleSendMessage = async (message: string) => {
+    const newPostData = { prompt: message };
+    console.log(sessionId);
+    const queryParams = { thread_id: sessionId };
+    // Add user's message to the state
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { text: message, user: true },
+    ]);
+
+    // Clear input field after sending a message
+    setInputValue("");
+
+    mutation.mutate({ newPostData, queryParams });
+  };
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value);
+  };
+
+  const handleClearChat = () => {
+    setMessages([]);
+    deleteMsg();
+  };
+
+  return (
+    <>
+      <Container
+        fixed
+        sx={{
+          bgcolor: "background.paper",
+          boxShadow: 1,
+          borderRadius: 2,
+          p: 3,
+          // mt: 2,
+          minWidth: 300,
+        }}
+      >
+        <Box
+          sx={{
+            height: 380, // Fixed height in pixels
+            overflow: "auto", // Enables scrolling when content overflows
+            border: "1px solid grey", // Optional: for visual clarity
+            padding: 2,
+          }}
+        >
+          {messages.map((msg, index) => (
+            <div key={index}>
+              {msg.user ? (
+                <>
+                  <Typography variant="caption" color="primary">
+                    You
+                  </Typography>
+                  <br />
+                  <Text text={msg.text} />
+                  <br />
+                </>
+              ) : (
+                <>
+                  <Typography variant="caption" color="primary">
+                    AI
+                  </Typography>
+                  <FormatText textWithNewlines={msg.text} />
+                  <Divider />
+                </>
+              )}
+            </div>
+          ))}
+        </Box>
+        <Box
+          sx={{
+            height: 160,
+            overflow: "auto",
+            padding: 2,
+          }}
+        >
+          {mutation.isPending ? (
+            <>
+              <TextField
+                label="Type your message"
+                value="Loading.."
+                // onChange={handleInputChange}
+                // onKeyDown={(event) => {
+                //   if (event.key === "Enter") {
+                //     handleSendMessage(inputValue);
+                //     event.preventDefault(); // Prevent form submission if needed
+                //   }
+                // }}
+                fullWidth
+                disabled
+              />
+              <Box
+                sx={{
+                  height: 20,
+                  padding: 2,
+                }}
+              >
+                <Button
+                  size="large"
+                  onClick={() => handleSendMessage(inputValue)}
+                  disabled
+                >
+                  Send
+                </Button>
+
+                <Button
+                  size="large"
+                  variant="contained"
+                  sx={{ float: "right" }}
+                  onClick={() => handleClearChat()}
+                  endIcon={<DeleteIcon />}
+                  color="success"
+                  disabled
+                >
+                  Clear Chat
+                </Button>
+              </Box>
+            </>
+          ) : (
+            <>
+              <TextField
+                label="Type your message"
+                value={inputValue}
+                onChange={handleInputChange}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    handleSendMessage(inputValue);
+                    event.preventDefault(); // Prevent form submission if needed
+                  }
+                }}
+                fullWidth
+              />
+              <Box
+                sx={{
+                  height: 20,
+                  padding: 2,
+                }}
+              >
+                <Button
+                  size="large"
+                  onClick={() => handleSendMessage(inputValue)}
+                >
+                  Send
+                </Button>
+
+                <Button
+                  size="large"
+                  variant="contained"
+                  sx={{ float: "right" }}
+                  onClick={() => handleClearChat()}
+                  endIcon={<DeleteIcon />}
+                  color="success"
+                >
+                  Clear Chat
+                </Button>
+              </Box>
+            </>
+          )}
+
+          {mutation.isError && <p>Error: {mutation.error.message}</p>}
+          {/* {mutation.isSuccess && <p>Post created successfully!</p>} */}
+        </Box>
+      </Container>
+    </>
+  );
+};
+
+export default Chat;
