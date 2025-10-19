@@ -10,9 +10,6 @@ COPY . /app
 WORKDIR /app
 RUN uv sync --frozen --no-cache
 
-RUN uv pip install "fastapi[standard]"
-
 # Run the application.
-CMD ["/app/.venv/bin/fastapi", "run", "app/main.py", "--port", "80", "--host", "0.0.0.0"]
-
-# APIConnectionError: Connection error - Need to fix
+#CMD ["/app/.venv/bin/fastapi", "run", "app/main.py", "--port", "80", "--host", "0.0.0.0"]
+CMD ["/app/.venv/bin/fastapi", "dev", "app/main.py", "--port", "8000", "--host", "0.0.0.0"]
