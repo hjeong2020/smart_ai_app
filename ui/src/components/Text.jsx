@@ -6,7 +6,7 @@ function Text({ text }) {
   // const formattedText = textWithNewlines.replace(/\n/g, "<br />");
   // console.log(textWithNewlines)
   return (
-    <Typography variant="bodyh6" sx={{ mt: 1 }} color="textSecondary">{text}</Typography>
+    <Typography variant="body1" sx={{ mt: 1 }} color="textSecondary">{text}</Typography>
   );
 }
 

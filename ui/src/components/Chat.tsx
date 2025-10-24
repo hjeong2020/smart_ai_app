@@ -8,12 +8,13 @@ import {
   Grid,
 } from "@mui/material";
 import Divider from "@mui/material/Divider";
-import DeleteIcon from '@mui/icons-material/Delete';
+import DeleteIcon from "@mui/icons-material/Delete";
 import Text from "./Text";
 import FormatText from "./FormatText";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { chatMsg, chatMsgV1, deleteMsg } from "../assets/query";
 import { v4 as uuidv4 } from "uuid";
+// import { ChatMessage } from "../assets/model";
 
 interface ChatMessage {
   text: string;
@@ -37,62 +38,18 @@ const Chat: React.FC = () => {
     if (!currentSessionId) {
       currentSessionId = uuidv4();
       sessionStorage.setItem("sessionId", currentSessionId);
-      console.log("here");
     }
     setSessionId(currentSessionId);
-
-    // return () => {
-    //   console.log('Component unmounted! Cleaning up...');
-    //   sessionStorage.removeItem('sessonId')
-    // };
   }, []);
 
   const mutation = useMutation({
     mutationFn: ({ newPostData, queryParams }) =>
       chatMsgV1(newPostData, queryParams),
     onSuccess: (data, variables, onMutateResult, context) => {
-      // Invalidate relevant queries to refetch data after a successful mutation
-      // queryClient.invalidateQueries(["posts"]);
-      console.log(data.response); //{prompt: 'Tell me an ice cream joke', response: 'Okay, here’s one for you, Bob:\n\nWhy did the ice cr…!” \n\n😄 \n\nHope that brought a smile to your face!', thread_id: 'a1'}
+      console.log(data.response);
       setMessages((prevMessages) => [...prevMessages, { text: data.response }]);
     },
   });
-
-  // const handleSubmit = () => {
-  //   const newPostData = { prompt: "Do you remember my name?" };
-  //   const queryParams = { thread_id: sessionId };
-
-  //   mutation.mutate({ newPostData, queryParams });
-  // };
-
-  // return (
-  //   <div>
-  //     <button onClick={handleSubmit} disabled={mutation.isPending}>
-  //       {mutation.isPending ? "Creating..." : "Create Post"}
-  //     </button>
-  //     {mutation.isError && <div>Error: {mutation.error.message}</div>}
-  //     {mutation.isSuccess && <div>Post created successfully!</div>}
-  //   </div>
-  // );
-
-  // const mutation = useMutation({
-  //   mutationFn: chatMsg,
-  //   // onSuccess: () => {
-  //   //   // Invalidate and refetch relevant queries after successful mutation
-  //   //   // queryClient.invalidateQueries(['posts']);
-  //   // },
-  //   onSuccess: (data, variables, onMutateResult, context) => {
-  //     // Add AI's response to the state
-  //     setMessages((prevMessages) => [
-  //       ...prevMessages,
-  //       { text: data.choices[0].message.content },
-  //     ]);
-  //   },
-  //   onError: (error) => {
-  //     // Handle errors
-  //     console.error("Error creating post:", error);
-  //   },
-  // });
 
   const handleSendMessage = async (message: string) => {
     const newPostData = { prompt: message };

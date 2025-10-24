@@ -27,6 +27,7 @@ import LibraryMusicIcon from "@mui/icons-material/LibraryMusic";
 import AccountBoxIcon from "@mui/icons-material/AccountBox";
 import SpeakerNotesIcon from "@mui/icons-material/SpeakerNotes";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
+import Review from "./Review";
 
 const drawerWidth = 240;
 
@@ -72,7 +73,7 @@ export default function Sidebar(props: Props) {
       case "Advanced Chat":
         return <span>{selectedComponent}</span>;
       case "Structured Chat":
-        return <span>{selectedComponent}</span>;
+        return <Review />;
       case "Bitcoin Prediction":
         return <span>{selectedComponent}</span>;
       case "Stock Prediction":
